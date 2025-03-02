@@ -7,7 +7,7 @@ SRCS = $(wildcard $(SRC_DIR)/*.c)
 OBJS = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 
 CC = clang
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -g
 
 
 .PHONY: all
@@ -29,8 +29,20 @@ $(NAME): $(OBJS)
 
 
 .PHONY: build
-build: $(NAME)
+build: $(NAME) ## Builds the binary
+
+.PHONY: clean
+clean: ## Cleans transitive dependencies
+	@rm -f $(OBJS)
+
+.PHONY: fclean 
+fclean: clean ## Cleans transitive dependencies and the binary
+	@rm -f $(NAME)
+
+.PHONY: re
+re: fclean build ## Rebuilds the binary
+
 
 .PHONY: t
-t: $(NAME)
+t: $(NAME) ## Runs the binary for test
 	@./$(NAME)
