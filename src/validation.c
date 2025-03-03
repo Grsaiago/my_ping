@@ -15,11 +15,7 @@ int	validate_or_resolve_address(ProgramConf *conf, char *address, struct sockadd
 	// call getaddrinfo and get the found/validated address and feed it to program_conf
 	error_value = getaddrinfo(address, NULL, &getaddr_hints, &getaddr_result);
 	if (error_value != 0) {
-		dprintf(STDERR_FILENO, "my_ping: error on dns lookup at getaddrinfo. %s\n", gai_strerror(error_value));
-		return (-1);
-	}
-	if (getaddr_result == NULL) {
-		dprintf(STDERR_FILENO, "my_ping: unknown host\n");
+		dprintf(STDERR_FILENO, "error: %s\n", gai_strerror(error_value));
 		return (-1);
 	}
 	memcpy(res, getaddr_result->ai_addr, getaddr_result->ai_addrlen);
