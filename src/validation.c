@@ -1,13 +1,9 @@
 #include "../include/my_ping.h"
 
-int	validate_or_resolve_address(ProgramConf *conf, char *address) {
+int	validate_or_resolve_address(ProgramConf *conf, char *address, struct sockaddr *res) {
 	struct addrinfo	*getaddr_result;
 	struct addrinfo	getaddr_hints;
 	int		error_value;
-	// debug declarations
-	struct sockaddr_in *ipv4_addr;
-	struct sockaddr_in6 *ipv6_addr;
-	const char *result;
 
 	getaddr_result = NULL;
 	// fill hints struct
@@ -24,23 +20,9 @@ int	validate_or_resolve_address(ProgramConf *conf, char *address) {
 	}
 	if (getaddr_result == NULL) {
 		dprintf(STDERR_FILENO, "my_ping: unknown host\n");
-		freeaddrinfo(getaddr_result);
 		return (-1);
 	}
-	memcpy(&conf->main_socket.remote_addr, getaddr_result->ai_addr, getaddr_result->ai_addrlen);
-	char	buff[100] = {0};
-	switch (conf->ip_version) {
-		case (IPV4):
-			ipv4_addr = (struct sockaddr_in *)&conf->main_socket.remote_addr;
-			result = inet_ntop(AF_INET, &ipv4_addr->sin_addr, buff, sizeof(buff));
-			break;
-		case (IPV6):
-			ipv6_addr = (struct sockaddr_in6 *)&conf->main_socket.remote_addr;
-			result = inet_ntop(AF_INET6, &ipv6_addr->sin6_addr, buff, sizeof(buff));
-			break;
-	}
-	(void)result;
-	printf("The ip is [%s]", buff);
+	memcpy(res, getaddr_result->ai_addr, getaddr_result->ai_addrlen);
 	freeaddrinfo(getaddr_result);
 	return (0);
 }
