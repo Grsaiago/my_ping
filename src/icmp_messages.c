@@ -66,29 +66,3 @@ int	recv_icmp_message(Socket *sock) {
 	printf("O valor de retorno da mensagem icmp foi:\n\tType: %d\n\tCode: %d\n", message_return.icmp_type, message_return.icmp_code);
 	return (0);
 }
-
-int	event_loop(ProgramConf *conf) {
-	struct icmp	message = {0};
-	struct timeval	start;
-	struct timeval	end;
-	int		err_value = 0;
-
-	while(true) {
-		// if it didn't error_create a new message.
-		// If there was an error, we need to retry the same message.
-		if (!err_value) {
-			message = new_icmp_echo_message(conf);
-		}
-		gettimeofday(&start, NULL);
-		err_value = send_icmp_message(&conf->main_socket, message);
-		if (!err_value) {
-			recv_icmp_message(&conf->main_socket);
-		} else {
-			continue;
-		}
-		gettimeofday(&end, NULL);
-		printf("the latency for the message is: %ld ms\n", ((end.tv_sec * (uint64_t)1000) + (end.tv_usec / 1000)) - ((start.tv_sec * (uint64_t)1000) + (start.tv_usec / 1000)));
-		sleep(conf->flags.packet_interval);
-	}
-	return (0);
-}
