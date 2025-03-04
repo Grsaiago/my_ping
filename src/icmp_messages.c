@@ -26,7 +26,6 @@ struct icmp	new_icmp_echo_message(ProgramConf *conf) {
 		}
 	};
 	message.icmp_cksum = calculate_checksum(&message, sizeof(struct icmp));
-
 	return (message);
 }
 
