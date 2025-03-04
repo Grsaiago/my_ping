@@ -13,6 +13,7 @@
 # include <stdlib.h>
 # include <netdb.h>
 # include <unistd.h>
+# include <argp.h>
 # include <errno.h>
 # include <sys/time.h>
 
@@ -32,7 +33,7 @@ typedef struct s_Socket {
 
 typedef struct s_ExecutionFlags {
 	bool		verbose; // -v --verbose
-	bool		so_debug; // -c --debug
+	bool		so_debug; // -d --debug
 	uint32_t	linger; // -W --linger
 	uint32_t	packet_interval; // -i --interval
 }	ExecutionFlags;
@@ -48,6 +49,9 @@ typedef struct s_ProgramConf {
 /* functions */
 int	new_raw_socket(Socket *res, struct sockaddr_storage *remote_addr, ExecutionFlags *flags);
 void	initialize_program_conf(ProgramConf *conf);
+/* parse functions */
+int		parse_arguments(ProgramConf *conf, int argc, char *argv[]);
+static error_t	parser_func(int key, char *arg, struct argp_state *state);
 // Performs dns lookup/ip validation for address using getaddrinfo and places found sockaddr_* in struct res
 int	validate_or_resolve_address(ProgramConf *conf, char *address, struct sockaddr *res);
 /* icmp messaging */
