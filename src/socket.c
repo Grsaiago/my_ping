@@ -6,7 +6,8 @@ int	new_raw_socket(Socket *res, struct sockaddr_storage *remote_addr, ExecutionF
 
 	// we don't need a raw socket because:
 	// https://sturmflut.github.io/linux/ubuntu/2015/01/17/unprivileged-icmp-sockets-on-linux/
-	sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_ICMP);
+	// We actually do, because without it the kernel sets the ttl of the iphdr to 0
+	sock = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
 	if (sock == -1) {
 		dprintf(STDERR_FILENO, "error on socket creation: %s\n", strerror(errno));
 		return (-1);
