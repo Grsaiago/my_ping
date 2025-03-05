@@ -6,4 +6,5 @@ void	initialize_program_conf(ProgramConf *conf) {
 	conf->flags.packet_interval = 1;
 	conf->flags.linger = -1;
 	conf->flags.count = -1;
+	conf->continue_execution = true;
 }

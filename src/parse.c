@@ -36,7 +36,7 @@ static error_t	parser_func(int key, char *arg, struct argp_state *state) {
 	switch (key) {
 		case ('c'):
 			if (arg == NULL || set_count(conf, arg) == -1) {
-				return (ARGP_ERR_UNKNOWN);
+				argp_error(state, "Count cannot be less than 0\n");
 			}
 			break ;
 		case ('d'):
@@ -44,7 +44,7 @@ static error_t	parser_func(int key, char *arg, struct argp_state *state) {
 			break ;
 		case ('i'):
 			if (arg == NULL || set_interval(conf, arg) == -1) {
-				return (ARGP_ERR_UNKNOWN);
+				argp_error(state, "Interval cannot be less than 1\n");
 			}
 			break ;
 		case ('v'):
@@ -52,9 +52,20 @@ static error_t	parser_func(int key, char *arg, struct argp_state *state) {
 			break ;
 		case ('W'):
 			if (arg == NULL || set_linger(conf, arg) == -1) {
-				return (ARGP_ERR_UNKNOWN);
+				argp_error(state, "Linger cannot be less than 0\n");
 			}
 			break ;
+		case (ARGP_KEY_ARG):
+			if (state->arg_num >= 1) {
+				argp_usage(state);
+			}
+			conf->program_arg = arg;
+			break;
+		case (ARGP_KEY_END):
+			if (state->arg_num < 1) {
+				argp_usage(state);
+			}
+			break;
 		default:
 			return (ARGP_ERR_UNKNOWN);
 	}
@@ -66,7 +77,6 @@ static int32_t	set_count(ProgramConf *conf, char *str_nbr) {
 
 	result_nbr = strtol(str_nbr, NULL,0);
 	if (result_nbr < 0 || errno == EINVAL || errno == ERANGE) {
-		dprintf(STDERR_FILENO, "Count cannot be less than 0\n");
 		return (-1);
 	}
 	conf->flags.count = result_nbr;
@@ -78,7 +88,6 @@ static int32_t	set_interval(ProgramConf *conf, char *str_nbr) {
 
 	result_nbr = strtol(str_nbr, NULL,0);
 	if (result_nbr < 0 || errno == EINVAL || errno == ERANGE) {
-		dprintf(STDERR_FILENO, "Interval cannot be less than 1\n");
 		return (-1);
 	}
 	conf->flags.packet_interval = result_nbr;
@@ -90,7 +99,6 @@ static int32_t	set_linger(ProgramConf *conf, char *str_nbr) {
 
 	result_nbr = strtol(str_nbr, NULL,0);
 	if (result_nbr < 0 || errno == EINVAL || errno == ERANGE) {
-		dprintf(STDERR_FILENO, "Linger cannot be less than 0\n");
 		return (-1);
 	}
 	conf->flags.linger = result_nbr;
