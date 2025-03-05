@@ -41,10 +41,12 @@ typedef struct s_Socket {
 }	Socket;
 
 /* ping program */
+#define DEFAULT_TTL 200
 typedef struct s_ExecutionFlags {
 	bool		verbose; // -v --verbose
 	bool		so_debug; // -d --debug
 	uint32_t	linger; // -W --linger
+	uint32_t	ttl; // -t --ttl
 	uint32_t	packet_interval; // -i --interval
 	uint32_t	count; // -c --count
 }	ExecutionFlags;

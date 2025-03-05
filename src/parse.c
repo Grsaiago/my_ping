@@ -1,9 +1,10 @@
 #include "../include/my_ping.h"
 
 static error_t	parser_func(int key, char *arg, struct argp_state *state);
-static int32_t	set_linger(ProgramConf *conf, char *str_nbr);
-static int32_t	set_interval(ProgramConf *conf, char *str_nbr);
 static int32_t	set_count(ProgramConf *conf, char *str_nbr);
+static int32_t	set_interval(ProgramConf *conf, char *str_nbr);
+static int32_t	set_ttl(ProgramConf *conf, char *str_nbr);
+static int32_t	set_linger(ProgramConf *conf, char *str_nbr);
 
 // argp global variables as per: https://www.gnu.org/software/libc/manual/html_node/Argp-Global-Variables.html
 const char			*argp_program_version = "1.0";
@@ -13,6 +14,7 @@ int	parse_arguments(ProgramConf *conf, int argc, char *argv[]) {
 		{ .name = "count", .key = 'c', .arg = "NUMBER", .doc = "Stop after sending NUMBER packets" },
 		{ .name = "debug", .key = 'd', .arg = NULL, .doc = "Set the SO_DEBUG option" },
 		{ .name = "interval", .key = 'i', .arg = "NUMBER", .doc = "Wait NUMBER seconds between sending each packet" },
+		{ .name = "ttl", .key = 't', .arg = "N", .doc = "specify N as time-to-live" },
 		{ .name = "verbose", .key = 'v', .arg = NULL, .doc = "Verbose output" },
 		{ .name = "linger", .key = 'W', .arg = "N", .doc = "Number of seconds to wait for response" },
 		{0}
@@ -47,6 +49,11 @@ static error_t	parser_func(int key, char *arg, struct argp_state *state) {
 				argp_error(state, "Interval cannot be less than 1\n");
 			}
 			break ;
+		case ('t'):
+			if (arg == NULL || set_ttl(conf, arg) == -1) {
+				argp_error(state, "ttl cannot be less than 1\n");
+			}
+			break ;
 		case ('v'):
 			conf->flags.verbose = true;
 			break ;
@@ -75,7 +82,7 @@ static error_t	parser_func(int key, char *arg, struct argp_state *state) {
 static int32_t	set_count(ProgramConf *conf, char *str_nbr) {
 	int32_t	result_nbr;
 
-	result_nbr = strtol(str_nbr, NULL,0);
+	result_nbr = strtol(str_nbr, NULL, 0);
 	if (result_nbr < 0 || errno == EINVAL || errno == ERANGE) {
 		return (-1);
 	}
@@ -86,7 +93,7 @@ static int32_t	set_count(ProgramConf *conf, char *str_nbr) {
 static int32_t	set_interval(ProgramConf *conf, char *str_nbr) {
 	int32_t	result_nbr;
 
-	result_nbr = strtol(str_nbr, NULL,0);
+	result_nbr = strtol(str_nbr, NULL, 0);
 	if (result_nbr < 0 || errno == EINVAL || errno == ERANGE) {
 		return (-1);
 	}
@@ -94,10 +101,21 @@ static int32_t	set_interval(ProgramConf *conf, char *str_nbr) {
 	return (0);
 }
 
+static int32_t	set_ttl(ProgramConf *conf, char *str_nbr) {
+	int32_t	result_nbr;
+
+	result_nbr = strtol(str_nbr, NULL, 0);
+	if (result_nbr < 1 || errno == EINVAL || errno == ERANGE) {
+		return (-1);
+	}
+	conf->flags.ttl = result_nbr;
+	return (0);
+}
+
 static int32_t	set_linger(ProgramConf *conf, char *str_nbr) {
 	int32_t	result_nbr;
 
-	result_nbr = strtol(str_nbr, NULL,0);
+	result_nbr = strtol(str_nbr, NULL, 0);
 	if (result_nbr < 0 || errno == EINVAL || errno == ERANGE) {
 		return (-1);
 	}

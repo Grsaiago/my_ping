@@ -1,4 +1,7 @@
 #include "../include/my_ping.h"
+#include <asm-generic/socket.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 
 int	new_raw_socket(Socket *res, struct sockaddr_storage *remote_addr, ExecutionFlags *flags) {
 	int	sock;
@@ -23,6 +26,9 @@ int	new_raw_socket(Socket *res, struct sockaddr_storage *remote_addr, ExecutionF
 			.tv_usec = 0,
 		};
 		setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &linger_time, sizeof(struct timeval));
+	}
+	if (flags->ttl != DEFAULT_TTL) {
+		setsockopt(sock, SOL_SOCKET, IP_TTL, &flags->ttl, sizeof(flags->ttl));
 	}
 	res->fd = sock;
 	res->remote_addr = *remote_addr;
