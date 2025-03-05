@@ -3,7 +3,7 @@
 static void	print_echo_reply_ok(ProgramConf *conf, IcmpMessage *message);
 static void	print_time_exceded_reply(ProgramConf *conf, IcmpMessage *message);
 static void	calculate_footer_metrics(PrintMetrics *metrics, const PingPacketStats *stats);
-static uint32_t	calculate_avg(const PingPacketStats *stats);
+static double	calculate_avg(const PingPacketStats *stats);
 static uint32_t	calculate_packet_loss_percent(const PingPacketStats *stats);
 
 void	print_header(ProgramConf *conf) {
@@ -80,7 +80,7 @@ static void calculate_footer_metrics(PrintMetrics *metrics, const PingPacketStat
 	return ;
 };
 
-static uint32_t	calculate_avg(const PingPacketStats *stats) {
+static double calculate_avg(const PingPacketStats *stats) {
 	uint32_t	total_packets;
 
 	total_packets = stats->oks + stats->errors;
