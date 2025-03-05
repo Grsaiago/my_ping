@@ -1,11 +1,9 @@
 #include "../include/my_ping.h"
-#include <asm-generic/socket.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
+
+static int set_socket_flags(int sock, ExecutionFlags *flags);
 
 int	new_raw_socket(Socket *res, struct sockaddr_storage *remote_addr, ExecutionFlags *flags) {
 	int	sock;
-	int	value;
 
 	// we don't need a raw socket because:
 	// https://sturmflut.github.io/linux/ubuntu/2015/01/17/unprivileged-icmp-sockets-on-linux/
@@ -16,10 +14,31 @@ int	new_raw_socket(Socket *res, struct sockaddr_storage *remote_addr, ExecutionF
 		dprintf(STDERR_FILENO, "error on socket creation: %s\n", strerror(errno));
 		return (-1);
 	}
+	if (set_socket_flags(sock, flags) != 0) {
+		return (-1);
+	}
+	res->fd = sock;
+	res->remote_addr = *remote_addr;
+	switch (res->remote_addr.ss_family) {
+		case (IPV4):
+			res->ipv4_addr = (struct sockaddr_in *)&res->remote_addr;
+			res->addr_struct_size = sizeof(struct sockaddr_in);
+			break;
+		case (IPV6):
+			res->ipv6_addr = (struct sockaddr_in6 *)&res->remote_addr;
+			res->addr_struct_size = sizeof(struct sockaddr_in6);
+			break; 
+	}
+	return (0);
+}
+
+static int set_socket_flags(int sock, ExecutionFlags *flags) {
+	int	value;
+
 	if (flags->so_debug == true) {
 		value = 1;
 		if (setsockopt(sock, SOL_SOCKET, SO_DEBUG, &value, sizeof(int)) != 0) {
-			dprintf(STDERR_FILENO, "error on setsockopt SO_RCVTIMEO: %s\n", strerror(errno));
+			dprintf(STDERR_FILENO, "error on setsockopt SO_DEBUG: %s\n", strerror(errno));
 			return (-1);
 		}
 	}
@@ -40,18 +59,6 @@ int	new_raw_socket(Socket *res, struct sockaddr_storage *remote_addr, ExecutionF
 			dprintf(STDERR_FILENO, "error on setsockopt IP_TTL: %s\n", strerror(errno));
 			return (-1);
 		}
-	}
-	res->fd = sock;
-	res->remote_addr = *remote_addr;
-	switch (res->remote_addr.ss_family) {
-		case (IPV4):
-			res->ipv4_addr = (struct sockaddr_in *)&res->remote_addr;
-			res->addr_struct_size = sizeof(struct sockaddr_in);
-			break;
-		case (IPV6):
-			res->ipv6_addr = (struct sockaddr_in6 *)&res->remote_addr;
-			res->addr_struct_size = sizeof(struct sockaddr_in6);
-			break; 
 	}
 	return (0);
 }
