@@ -23,10 +23,9 @@ int main(int argc, char *argv[]) {
 }
 
 int	event_loop(ProgramConf *conf) {
-	struct icmp	message = {0};
-	struct timeval	start;
-	struct timeval	end;
 	extern bool	my_ping_should_continue;
+	struct icmp	message = {0};
+	IcmpMessage	last_message = {0};
 	int		err_value = 0;
 	int		recv_result = 0;
 
@@ -37,20 +36,20 @@ int	event_loop(ProgramConf *conf) {
 		if (!err_value) {
 			message = new_icmp_echo_message(conf);
 		}
-		gettimeofday(&start, NULL);
+		gettimeofday(&last_message.sent_at, NULL);
 		err_value = send_icmp_message(&conf->main_socket, message);
 		if (!err_value) {
-			recv_result = recv_icmp_message(&conf->main_socket);
+			recv_result = recv_icmp_message(&conf->main_socket, &last_message);
 			if (recv_result == -1 && errno == EINTR) {
 				break;
 			}
 		} else {
 			continue;
 		}
-		gettimeofday(&end, NULL);
-		printf("the latency for the message is: %ld ms\n", ((end.tv_sec * (uint64_t)1000) + (end.tv_usec / 1000)) - ((start.tv_sec * (uint64_t)1000) + (start.tv_usec / 1000)));
+		gettimeofday(&last_message.recv_at, NULL);
+		print_icmp_message(conf, &last_message);
 		sleep(conf->flags.packet_interval);
 	}
-	printf("Saiu do event loop em\n");
+	print_footer(conf);
 	return (0);
 }

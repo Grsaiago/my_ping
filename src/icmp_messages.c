@@ -45,10 +45,9 @@ int	send_icmp_message(Socket *sock, struct icmp message) {
 	return (0);
 }
 
-int	recv_icmp_message(Socket *sock) {
+int	recv_icmp_message(Socket *sock, IcmpMessage *message) {
 	// as per man raw: "For receiving, the IP header is always included in the packet."
-	char		readbuff[sizeof(struct icmp) + sizeof(struct iphdr) + 2] = {0};
-	struct icmp	message_return  = {0};
+	char		readbuff[sizeof(struct icmp) + sizeof(struct iphdr)] = {0};
 	int		err_value;
 
 	err_value = recvfrom(sock->fd, readbuff, sizeof(readbuff),
@@ -62,7 +61,7 @@ int	recv_icmp_message(Socket *sock) {
 			return (1);
 		}
 	}
-	memcpy(&message_return, (char *)readbuff + sizeof(struct iphdr) , sizeof(struct icmp));
-	printf("O valor de retorno da mensagem icmp foi:\n\tType: %d\n\tCode: %d\n", message_return.icmp_type, message_return.icmp_code);
+	message->iphdr = *(struct iphdr *)readbuff;
+	message->icmp = *(struct icmp *)(readbuff + (message->iphdr.ihl * 4));
 	return (0);
 }

@@ -24,6 +24,13 @@ typedef enum e_IpVersion {
 	IPV6 = AF_INET6,
 }	IpVersion;
 
+typedef struct s_IcmpMessage {
+	struct iphdr	iphdr;
+	struct icmp	icmp;
+	struct timeval	sent_at;
+	struct timeval	recv_at;
+}	IcmpMessage;
+
 /* socket */
 typedef struct s_Socket {
 	int			fd;
@@ -33,6 +40,7 @@ typedef struct s_Socket {
 	socklen_t		addr_struct_size;
 }	Socket;
 
+/* ping program */
 typedef struct s_ExecutionFlags {
 	bool		verbose; // -v --verbose
 	bool		so_debug; // -d --debug
@@ -41,7 +49,6 @@ typedef struct s_ExecutionFlags {
 	uint32_t	count; // -c --count
 }	ExecutionFlags;
 
-/* ping program */
 typedef struct s_ProgramConf {
 	IpVersion	ip_version;
 	uint64_t	msg_seq;
@@ -51,6 +58,7 @@ typedef struct s_ProgramConf {
 	char		resolved_addr[INET6_ADDRSTRLEN];
 	bool		continue_execution;
 }	ProgramConf;
+
 
 /* functions */
 void	install_signal_handlers(void);
@@ -64,9 +72,11 @@ int	validate_or_resolve_address(ProgramConf *conf, struct sockaddr *res);
 unsigned short	calculate_checksum(void *b, int len);
 struct icmp	new_icmp_echo_message(ProgramConf *conf);
 int		send_icmp_message(Socket *sock, struct icmp message);
-int		recv_icmp_message(Socket *sock);
+int		recv_icmp_message(Socket *sock, IcmpMessage *message);
 /* printing */
 void	print_header(ProgramConf *conf);
+void	print_icmp_message(ProgramConf *conf, IcmpMessage *message);
+void	print_footer(ProgramConf *conf);
 /* main event loop */
 int		event_loop(ProgramConf *conf);
 

@@ -8,7 +8,7 @@ int	new_raw_socket(Socket *res, struct sockaddr_storage *remote_addr, ExecutionF
 	// https://sturmflut.github.io/linux/ubuntu/2015/01/17/unprivileged-icmp-sockets-on-linux/
 	// We actually do, because without it the kernel sets the ttl of the iphdr to 0
 	// to have it run without sudo, we need to run 'sudo setcap cap_net_raw+ep ./my_ping'
-	sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_ICMP);
+	sock = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
 	if (sock == -1) {
 		dprintf(STDERR_FILENO, "error on socket creation: %s\n", strerror(errno));
 		return (-1);
