@@ -38,15 +38,15 @@ int	event_loop(ProgramConf *conf) {
 		}
 		gettimeofday(&last_message.sent_at, NULL);
 		err_value = send_icmp_message(&conf->main_socket, message);
-		if (!err_value) {
-			recv_result = recv_icmp_message(&conf->main_socket, &last_message);
-			if (recv_result == -1 && errno == EINTR) {
-				break;
-			}
-		} else {
-			continue;
+		if (err_value != 0) {
+			continue ;
+		}
+		recv_result = recv_icmp_message(&conf->main_socket, &last_message);
+		if (recv_result == -1 && errno == EINTR) {
+			break;
 		}
 		gettimeofday(&last_message.recv_at, NULL);
+		record_new_message(conf, &last_message);
 		print_icmp_message(conf, &last_message);
 		sleep(conf->flags.packet_interval);
 	}

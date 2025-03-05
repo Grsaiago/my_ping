@@ -9,4 +9,6 @@ void	initialize_program_conf(ProgramConf *conf) {
 	conf->flags.linger = -1;
 	conf->flags.count = -1;
 	conf->flags.ttl = DEFAULT_TTL;
+	conf->pkt_stats.rtt_max = DBL_MIN;
+	conf->pkt_stats.rtt_min = DBL_MAX;
 }

@@ -1,8 +1,10 @@
 #include "../include/my_ping.h"
 
 static void	print_echo_reply_ok(ProgramConf *conf, IcmpMessage *message);
-static double	calculate_rtt_in_ms(const struct timeval *start, const struct timeval *end);
 static void	print_time_exceded_reply(ProgramConf *conf, IcmpMessage *message);
+static void	calculate_footer_metrics(PrintMetrics *metrics, const PingPacketStats *stats);
+static uint32_t	calculate_avg(const PingPacketStats *stats);
+static uint32_t	calculate_packet_loss_percent(const PingPacketStats *stats);
 
 void	print_header(ProgramConf *conf) {
 	if (conf->flags.verbose) {
@@ -18,8 +20,18 @@ void	print_header(ProgramConf *conf) {
 }
 
 void	print_footer(ProgramConf *conf) {
+	PrintMetrics	print_metrics;
+
+	calculate_footer_metrics(&print_metrics, &conf->pkt_stats);
 	printf("--- %s statistics --- \n", conf->program_arg);
-	printf("TODO uma porrada de estatística\n");
+	printf("%d packets transmitted, %d packets received, %d%% packet loss\n",
+		conf->pkt_stats.oks + conf->pkt_stats.errors, conf->pkt_stats.oks, print_metrics.loss_percent);
+	if (print_metrics.loss_percent != 100) {
+		 /*round-trip min/avg/max/stddev = 9.163/9.226/9.296/0.055 ms */
+		printf("round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n",
+			conf->pkt_stats.rtt_min, print_metrics.avg,
+			conf->pkt_stats.rtt_max, print_metrics.stddev);
+	}
 	return ;
 }
 
@@ -51,7 +63,6 @@ static void	print_time_exceded_reply(ProgramConf *conf, IcmpMessage *message) {
 	char		resolved_addr[INET6_ADDRSTRLEN] = {0};
 	struct in_addr ipv4;
 
-
 	ipv4.s_addr = message->iphdr.saddr;
 	inet_ntop(conf->ip_version, &(ipv4.s_addr),
 	     resolved_addr, sizeof(resolved_addr));
@@ -60,10 +71,33 @@ static void	print_time_exceded_reply(ProgramConf *conf, IcmpMessage *message) {
 	return ;
 }
 
-static double	calculate_rtt_in_ms(const struct timeval *start, const struct timeval *end) {
-	double	latency;
+// TODO: Add a calculate footer metrics
+static void calculate_footer_metrics(PrintMetrics *metrics, const PingPacketStats *stats) {
+	metrics->avg = calculate_avg(stats);
+	metrics->loss_percent = calculate_packet_loss_percent(stats);
+	//TODO: stddev
+	metrics->stddev = 0.123;
+	return ;
+};
 
-	latency = ((end->tv_sec * (double)1000) + ((double)end->tv_usec / 1000))
-		- ((start->tv_sec * (double)1000) + ((double)start->tv_usec / 1000));
-	return (latency);
+static uint32_t	calculate_avg(const PingPacketStats *stats) {
+	uint32_t	total_packets;
+
+	total_packets = stats->oks + stats->errors;
+	if (total_packets == 0 || stats->rtt_sum == 0) {
+		return (0);
+	} else {
+		return (stats->rtt_sum / total_packets);
+	}
+
+}
+
+static uint32_t	calculate_packet_loss_percent(const PingPacketStats *stats) {
+	if (stats->oks != 0 && stats->errors != 0) {
+		return ((uint32_t)(100 * stats->errors) / (stats->oks + stats->errors));
+	} else if (stats->oks == 0 && stats->errors != 0) {
+		return (100);
+	} else {
+		return (0);
+	}
 }
