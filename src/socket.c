@@ -18,17 +18,28 @@ int	new_raw_socket(Socket *res, struct sockaddr_storage *remote_addr, ExecutionF
 	}
 	if (flags->so_debug == true) {
 		value = 1;
-		setsockopt(sock, SOL_SOCKET, SO_DEBUG, &value, sizeof(int));
+		if (setsockopt(sock, SOL_SOCKET, SO_DEBUG, &value, sizeof(int)) != 0) {
+			dprintf(STDERR_FILENO, "error on setsockopt SO_RCVTIMEO: %s\n", strerror(errno));
+			return (-1);
+		}
 	}
 	if (flags->linger > 0) {
 		struct timeval	linger_time = {
 			.tv_sec = flags->linger,
 			.tv_usec = 0,
 		};
-		setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &linger_time, sizeof(struct timeval));
+		if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &linger_time, sizeof(struct timeval)) != 0) {
+			dprintf(STDERR_FILENO, "error on setsockopt SO_RCVTIMEO: %s\n", strerror(errno));
+			return (-1);
+		}
 	}
 	if (flags->ttl != DEFAULT_TTL) {
-		setsockopt(sock, SOL_SOCKET, IP_TTL, &flags->ttl, sizeof(flags->ttl));
+		value = flags->ttl;
+		// TODO: Add an option for ipv6
+		if (setsockopt(sock, IPPROTO_IP, IP_TTL, &value, sizeof(int)) != 0) {
+			dprintf(STDERR_FILENO, "error on setsockopt IP_TTL: %s\n", strerror(errno));
+			return (-1);
+		}
 	}
 	res->fd = sock;
 	res->remote_addr = *remote_addr;
