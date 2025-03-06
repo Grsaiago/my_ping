@@ -1,6 +1,4 @@
 #include "../include/my_ping.h"
-#include <arpa/inet.h>
-#include <sys/socket.h>
 
 int	validate_or_resolve_address(ProgramConf *conf, struct sockaddr *res) {
 	struct addrinfo	*getaddr_result;
