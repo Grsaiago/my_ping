@@ -1,7 +1,7 @@
 #include "../include/my_ping.h"
 
-static void	print_echo_reply_ok(ProgramConf *conf, IcmpMessage *message);
-static void	print_time_exceded_reply(ProgramConf *conf, IcmpMessage *message);
+static void	print_echo_reply_ok(ProgramConf *conf, IcmpReply *message);
+static void	print_time_exceded_reply(ProgramConf *conf, IcmpReply *message);
 static void	calculate_footer_metrics(PrintMetrics *metrics, const PingPacketStats *stats);
 static double	calculate_avg(const PingPacketStats *stats);
 static uint32_t	calculate_packet_loss_percent(const PingPacketStats *stats);
@@ -36,7 +36,7 @@ void	print_footer(ProgramConf *conf) {
 	return ;
 }
 
-void	print_icmp_message(ProgramConf *conf, IcmpMessage *message) {
+void	print_icmp_message(ProgramConf *conf, IcmpReply *message) {
 	switch (message->icmp.icmp_type) {
 		case (ICMP_ECHOREPLY):
 			print_echo_reply_ok(conf, message);
@@ -51,7 +51,7 @@ void	print_icmp_message(ProgramConf *conf, IcmpMessage *message) {
 	return ;
 }
 
-static void	print_echo_reply_ok(ProgramConf *conf, IcmpMessage *message) {
+static void	print_echo_reply_ok(ProgramConf *conf, IcmpReply *message) {
 	printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.4f ms\n",
 		ntohs(message->iphdr.tot_len),
 		conf->resolved_addr, message->icmp.icmp_hun.ih_idseq.icd_seq,
@@ -60,7 +60,7 @@ static void	print_echo_reply_ok(ProgramConf *conf, IcmpMessage *message) {
 }
 
 // No support for ipv6, only ipv4
-static void	print_time_exceded_reply(ProgramConf *conf, IcmpMessage *message) {
+static void	print_time_exceded_reply(ProgramConf *conf, IcmpReply *message) {
 	char		resolved_addr[INET6_ADDRSTRLEN] = {0};
 	struct in_addr ipv4;
 

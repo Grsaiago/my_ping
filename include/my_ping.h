@@ -25,11 +25,17 @@ typedef enum e_IpVersion {
 	IPV6 = AF_INET6,
 }	IpVersion;
 
-typedef struct s_IcmpMessage {
+typedef struct s_IcmpReply {
 	struct iphdr	iphdr;
 	struct icmp	icmp;
 	struct timeval	sent_at;
 	struct timeval	recv_at;
+}	IcmpReply;
+
+// As specified by 'man ping'
+typedef struct s_IcmpMessage {
+	struct icmp	icmp;
+	struct timeval	timestamp;
 }	IcmpMessage;
 
 /* socket */
@@ -89,15 +95,15 @@ int		parse_arguments(ProgramConf *conf, int argc, char *argv[]);
 int	validate_or_resolve_address(ProgramConf *conf, struct sockaddr *res);
 /* icmp messaging */
 unsigned short	calculate_checksum(void *b, int len);
-struct icmp	new_icmp_echo_message(ProgramConf *conf);
-int		send_icmp_message(Socket *sock, struct icmp message);
-int		recv_icmp_message(Socket *sock, IcmpMessage *message);
+IcmpMessage	new_icmp_echo_message(ProgramConf *conf);
+int		send_icmp_message(Socket *sock, IcmpMessage *message);
+int		recv_icmp_message(Socket *sock, IcmpReply *message);
 double		calculate_rtt_in_ms(const struct timeval *start, const struct timeval *end);
 /* record messages */
-void	record_new_message(ProgramConf *conf, IcmpMessage *message);
+void	record_new_response(ProgramConf *conf, IcmpReply *message);
 /* printing */
 void	print_header(ProgramConf *conf);
-void	print_icmp_message(ProgramConf *conf, IcmpMessage *message);
+void	print_icmp_message(ProgramConf *conf, IcmpReply *message);
 void	print_footer(ProgramConf *conf);
 /* main event loop */
 int		event_loop(ProgramConf *conf);

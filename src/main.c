@@ -24,8 +24,8 @@ int main(int argc, char *argv[]) {
 
 int	event_loop(ProgramConf *conf) {
 	extern bool	my_ping_should_continue;
-	struct icmp	message = {0};
-	IcmpMessage	last_message = {0};
+	IcmpMessage	message = {0};
+	IcmpReply	last_message = {0};
 	int		err_value = 0;
 	int		recv_result = 0;
 
@@ -37,7 +37,7 @@ int	event_loop(ProgramConf *conf) {
 			message = new_icmp_echo_message(conf);
 		}
 		gettimeofday(&last_message.sent_at, NULL);
-		err_value = send_icmp_message(&conf->main_socket, message);
+		err_value = send_icmp_message(&conf->main_socket, &message);
 		if (err_value != 0) {
 			continue ;
 		}
@@ -46,7 +46,7 @@ int	event_loop(ProgramConf *conf) {
 			break;
 		}
 		gettimeofday(&last_message.recv_at, NULL);
-		record_new_message(conf, &last_message);
+		record_new_response(conf, &last_message);
 		print_icmp_message(conf, &last_message);
 		sleep(conf->flags.packet_interval);
 	}

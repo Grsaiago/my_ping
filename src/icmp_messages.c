@@ -16,22 +16,25 @@ unsigned short calculate_checksum(void *b, int len) {
 	return result;
 }
 
-struct icmp	new_icmp_echo_message(ProgramConf *conf) {
-	struct icmp message = {
-		.icmp_type = ICMP_ECHO,
-		.icmp_code = 0,
-		.icmp_hun.ih_idseq = {
-			.icd_id = getpid(),
-			.icd_seq = ++conf->msg_seq,
+IcmpMessage	new_icmp_echo_message(ProgramConf *conf) {
+	IcmpMessage message = {
+		.icmp = {
+			.icmp_type = ICMP_ECHO,
+			.icmp_code = 0,
+			.icmp_hun.ih_idseq = {
+				.icd_id = getpid(),
+				.icd_seq = ++conf->msg_seq,
+			}
 		}
 	};
-	message.icmp_cksum = calculate_checksum(&message, sizeof(struct icmp));
+	gettimeofday(&message.timestamp, NULL);
+	message.icmp.icmp_cksum = calculate_checksum(&message, sizeof(IcmpMessage));
 	return (message);
 }
 
-int	send_icmp_message(Socket *sock, struct icmp message) {
+int	send_icmp_message(Socket *sock, IcmpMessage *message) {
 	int		err_value;
-	err_value = sendto(sock->fd, (void *)&message, sizeof(struct icmp), 0,
+	err_value = sendto(sock->fd, (void *)message, sizeof(IcmpMessage), 0,
 		    (const struct sockaddr *)&sock->remote_addr,
 		    sock->addr_struct_size);
 	if (err_value < (int)sock->addr_struct_size) {
@@ -45,9 +48,9 @@ int	send_icmp_message(Socket *sock, struct icmp message) {
 	return (0);
 }
 
-int	recv_icmp_message(Socket *sock, IcmpMessage *message) {
+int	recv_icmp_message(Socket *sock, IcmpReply *message) {
 	// as per man raw: "For receiving, the IP header is always included in the packet."
-	char		readbuff[sizeof(struct icmp) + sizeof(struct iphdr)] = {0};
+	char		readbuff[sizeof(struct iphdr) + sizeof(IcmpMessage)] = {0};
 	int		err_value;
 
 	err_value = recvfrom(sock->fd, readbuff, sizeof(readbuff),
