@@ -1,15 +1,16 @@
 #include "../include/my_ping.h"
 
-static void record_time_exceded_response(ProgramConf *conf, IcmpReply *message);
-static void record_echo_reply_response(ProgramConf *conf, IcmpReply *message);
+static void record_err_reply(ProgramConf *conf, IcmpReply *message);
+static void record_ok_reply(ProgramConf *conf, IcmpReply *message);
 
 void record_new_response(ProgramConf *conf, IcmpReply *message) {
 	switch (message->icmp.icmp_type) {
+		case (ICMP_ECHO):
 		case (ICMP_ECHOREPLY):
-			record_echo_reply_response(conf, message);
+			record_ok_reply(conf, message);
 			break;
 		case (ICMP_TIME_EXCEEDED):
-			record_time_exceded_response(conf, message);
+			record_err_reply(conf, message);
 			break;
 		default:
 			printf("Tried to record unsupported message, recording it as an error\n");
@@ -18,7 +19,7 @@ void record_new_response(ProgramConf *conf, IcmpReply *message) {
 	return ;
 }
 
-static void record_echo_reply_response(ProgramConf *conf, IcmpReply *message) {
+static void record_ok_reply(ProgramConf *conf, IcmpReply *message) {
 	double	packet_rtt;
 
 	packet_rtt = calculate_rtt_in_ms(&message->sent_at, &message->recv_at);
@@ -35,7 +36,7 @@ static void record_echo_reply_response(ProgramConf *conf, IcmpReply *message) {
 	return ;
 }
 
-static void record_time_exceded_response(ProgramConf *conf, IcmpReply *message) {
+static void record_err_reply(ProgramConf *conf, IcmpReply *message) {
 	(void)message;
 	conf->pkt_stats.errors++;
 	return ;

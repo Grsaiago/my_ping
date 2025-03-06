@@ -1,6 +1,7 @@
 #include "../include/my_ping.h"
+#include <netinet/ip_icmp.h>
 
-static void	print_echo_reply_ok(ProgramConf *conf, IcmpReply *message);
+static void	print_generic_ok(ProgramConf *conf, IcmpReply *message);
 static void	print_time_exceded_reply(ProgramConf *conf, IcmpReply *message);
 static void	calculate_footer_metrics(PrintMetrics *metrics, const PingPacketStats *stats);
 static double	calculate_avg(const PingPacketStats *stats);
@@ -38,8 +39,9 @@ void	print_footer(ProgramConf *conf) {
 
 void	print_icmp_message(ProgramConf *conf, IcmpReply *message) {
 	switch (message->icmp.icmp_type) {
+		case (ICMP_ECHO):
 		case (ICMP_ECHOREPLY):
-			print_echo_reply_ok(conf, message);
+			print_generic_ok(conf, message);
 			break;
 		case (ICMP_TIMXCEED):
 			print_time_exceded_reply(conf, message);
@@ -51,7 +53,7 @@ void	print_icmp_message(ProgramConf *conf, IcmpReply *message) {
 	return ;
 }
 
-static void	print_echo_reply_ok(ProgramConf *conf, IcmpReply *message) {
+static void	print_generic_ok(ProgramConf *conf, IcmpReply *message) {
 	printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.4f ms\n",
 		ntohs(message->iphdr.tot_len),
 		conf->resolved_addr, message->icmp.icmp_hun.ih_idseq.icd_seq,
@@ -72,7 +74,6 @@ static void	print_time_exceded_reply(ProgramConf *conf, IcmpReply *message) {
 	return ;
 }
 
-// TODO: Add a calculate footer metrics
 static void calculate_footer_metrics(PrintMetrics *metrics, const PingPacketStats *stats) {
 	metrics->avg = calculate_avg(stats);
 	metrics->loss_percent = calculate_packet_loss_percent(stats);

@@ -48,7 +48,11 @@ int	event_loop(ProgramConf *conf) {
 		gettimeofday(&last_message.recv_at, NULL);
 		record_new_response(conf, &last_message);
 		print_icmp_message(conf, &last_message);
-		sleep(conf->flags.packet_interval);
+		if ((conf->flags.count != (uint32_t)-1) && (conf->msg_seq + 1 >= conf->flags.count)) {
+			my_ping_should_continue = false;
+		} else {
+			sleep(conf->flags.packet_interval);
+		}
 	}
 	print_footer(conf);
 	return (0);
