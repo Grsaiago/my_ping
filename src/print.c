@@ -5,6 +5,7 @@ static void	print_time_exceded_reply(ProgramConf *conf, IcmpMessage *message);
 static void	calculate_footer_metrics(PrintMetrics *metrics, const PingPacketStats *stats);
 static double	calculate_avg(const PingPacketStats *stats);
 static uint32_t	calculate_packet_loss_percent(const PingPacketStats *stats);
+static double	calculate_stdandard_deviation(const PingPacketStats *stats);
 
 void	print_header(ProgramConf *conf) {
 	if (conf->flags.verbose) {
@@ -75,8 +76,7 @@ static void	print_time_exceded_reply(ProgramConf *conf, IcmpMessage *message) {
 static void calculate_footer_metrics(PrintMetrics *metrics, const PingPacketStats *stats) {
 	metrics->avg = calculate_avg(stats);
 	metrics->loss_percent = calculate_packet_loss_percent(stats);
-	//TODO: stddev
-	metrics->stddev = 0.123;
+	metrics->stddev = calculate_stdandard_deviation(stats);
 	return ;
 };
 
@@ -89,7 +89,6 @@ static double calculate_avg(const PingPacketStats *stats) {
 	} else {
 		return (stats->rtt_sum / total_packets);
 	}
-
 }
 
 static uint32_t	calculate_packet_loss_percent(const PingPacketStats *stats) {
@@ -100,4 +99,16 @@ static uint32_t	calculate_packet_loss_percent(const PingPacketStats *stats) {
 	} else {
 		return (0);
 	}
+}
+
+static double calculate_stdandard_deviation(const PingPacketStats *stats) {
+	double mean = stats->rtt_sum / stats->oks;
+	double variance = (stats->rtt_sum_square / stats->oks) - (mean * mean);
+
+	if (stats->oks == 0) {
+		return 0.0f;
+	}
+	mean = stats->rtt_sum / stats->oks;
+	variance = (stats->rtt_sum_square / stats->oks) - (mean * mean);
+	return sqrt(variance);
 }

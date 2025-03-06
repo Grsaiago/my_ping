@@ -18,6 +18,7 @@
 # include <sys/time.h>
 # include <signal.h>
 # include <float.h>
+# include <math.h>
 
 typedef enum e_IpVersion {
 	IPV4 = AF_INET,
@@ -57,6 +58,7 @@ typedef struct s_PingPacketStats {
 	float		rtt_min;
 	float		rtt_max;
 	double		rtt_sum;
+	double		rtt_sum_square;
 }	PingPacketStats;
 
 typedef struct s_ProgramConf {

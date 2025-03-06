@@ -23,14 +23,16 @@ static void record_echo_reply_message(ProgramConf *conf, IcmpMessage *message) {
 	double	packet_rtt;
 
 	packet_rtt = calculate_rtt_in_ms(&message->sent_at, &message->recv_at);
-	conf->pkt_stats.oks++;
-	conf->pkt_stats.rtt_sum += packet_rtt;
-	if (conf->pkt_stats.rtt_min > packet_rtt) {
+	if (conf->pkt_stats.oks == 0 || conf->pkt_stats.rtt_min > packet_rtt) {
 		conf->pkt_stats.rtt_min = packet_rtt;
 	}
-	if (conf->pkt_stats.rtt_max < packet_rtt) {
+	if (conf->pkt_stats.oks == 0 || conf->pkt_stats.rtt_max < packet_rtt) {
 		conf->pkt_stats.rtt_max = packet_rtt;
 	}
+
+	conf->pkt_stats.oks++;
+	conf->pkt_stats.rtt_sum += packet_rtt;
+	conf->pkt_stats.rtt_sum_square += packet_rtt * packet_rtt;
 	return ;
 }
 
