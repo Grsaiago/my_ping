@@ -49,15 +49,6 @@ ECHO_REPLY, and ICMP_TIMXCEED messages.
 - Final metrics: min, max and average round trip time (rtt) measurement,
 as well as standard deviation.
 
-## Steps
-
-1. Resolve FQDN before sending the packet:
-use [getaddrinfo](https://man7.org/linux/man-pages/man3/getaddrinfo.3.html) to
-resolve the inputed domain name.
-1. Use sendto to send messages
-1. read the ip packet header into an iphdr/icmp struct
-(They exist, look at <netinet/ip.h> and <netinet/ip_icmp.h>)
-
 ## Examples
 
 - Ping a host 5 times:
@@ -80,25 +71,25 @@ sudo ./my_ping -v google.com
 
 ## How It Works
 
-1. Initialization:
+### Initialization:
 
-The program parses command-line arguments and validates the target host.
+1. The program parses command-line arguments and validates the target host.
+1. A raw socket is created to send and receive ICMP packets.
+1. The hostname is resolved with DNS or validated (in case of an ipaddr input).
 
-A raw socket is created to send and receive ICMP packets.
+### ICMP Packet Handling:
 
-1. ICMP Packet Handling:
+1. ICMP ECHO_REQUEST packets are constructed and sent to the target host.
 
-ICMP ECHO_REQUEST packets are constructed and sent to the target host.
+1. The program listens for ECHO_REPLY packets and calculates round-trip times.
 
-The program listens for ECHO_REPLY packets and calculates round-trip times.
+### Signal Handling:
 
-1. Signal Handling:
+1. The program handles interruptions (e.g., Ctrl+C) and displays statistics before exiting.
 
-The program handles interruptions (e.g., Ctrl+C) and displays statistics before exiting.
+### Output:
 
-.1 Output:
-
-The program prints detailed information about each packet,
+1. The program prints detailed information about each packet,
 including sequence numbers, round-trip times, and TTL values.
 
 ## References
