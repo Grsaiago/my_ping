@@ -115,4 +115,4 @@ reverse dns
 
 Inspired by the inettools 2.0 ping utility.
 
-Built with 💖 and a healthy ammount of coffee.
+Built with 💖 and a healthy amount of coffee.
