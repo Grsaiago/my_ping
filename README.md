@@ -1,6 +1,9 @@
 # ft_ping
 
-Recreating the inettools-2.0 ping in C, one ICMP ECHO_REQUEST packet at a time xD
+Recreating the inettools-2.0 ping in C, one ICMP ECHO_REQUEST packet at a time xD.
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/d83d57ee-842e-4da3-9846-a52e436074bd" alt="usage gif" />
+</p>
 
 ## 📂 Project Structure
 
