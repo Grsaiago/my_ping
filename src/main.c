@@ -8,9 +8,6 @@ int main(int argc, char *argv[]) {
 
 	initialize_program_conf(&conf);
 	parse_arguments(&conf, argc, argv);
-	if (conf.flags.verbose) {
-		printf("O valor das flags é:\nverbose: %d\nso_debug: %d\nlinger: %d\npacket_interval: %d\ncount: %d\nO valor da struct é:\narg: %s\n", conf.flags.verbose, conf.flags.so_debug, conf.flags.linger, conf.flags.packet_interval, conf.flags.count, conf.program_arg);
-	}
 	install_signal_handlers();
 	if (validate_or_resolve_address(&conf, (struct sockaddr *)&socket_confs) == -1) {
 		return (-1);
