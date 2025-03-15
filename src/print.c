@@ -130,6 +130,10 @@ static void print_ip_icmp_hdr(IcmpReply *message) {
            message->iphdr.ttl, message->iphdr.protocol, ntohs(message->iphdr.check),
            inet_ntoa(*(struct in_addr *)&message->iphdr.saddr),
            inet_ntoa(*(struct in_addr *)&message->iphdr.daddr));
-    printf("ICMP: type 8, code 0, size 64, id 0x082d, seq 0x0001\n");
+	   printf("ICMP: type %d, code %d, size %d, id 0x%04x, seq 0x%04x\n",
+           message->icmp.icmp_type, message->icmp.icmp_code,
+           ntohs(message->iphdr.tot_len) - (message->iphdr.ihl * 4),
+		   ntohs(message->icmp.icmp_hun.ih_idseq.icd_id),
+           ntohs(message->icmp.icmp_hun.ih_idseq.icd_seq));
 	return ;
 }
