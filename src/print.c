@@ -3,6 +3,7 @@
 
 static void	print_generic_ok(ProgramConf *conf, IcmpReply *message);
 static void	print_time_exceded_reply(ProgramConf *conf, IcmpReply *message);
+static void print_ip_icmp_hdr(IcmpReply *message);
 static void	calculate_footer_metrics(PrintMetrics *metrics, const PingPacketStats *stats);
 static double	calculate_avg(const PingPacketStats *stats);
 static uint32_t	calculate_packet_loss_percent(const PingPacketStats *stats);
@@ -45,6 +46,9 @@ void	print_icmp_message(ProgramConf *conf, IcmpReply *message) {
 			break;
 		case (ICMP_TIMXCEED):
 			print_time_exceded_reply(conf, message);
+			if (conf->flags.verbose == true) {
+				print_ip_icmp_hdr(message);
+			}
 			break;
 		default:
 			printf("Received unsupported icmp message\n");
@@ -112,4 +116,20 @@ static double calculate_stdandard_deviation(const PingPacketStats *stats) {
 	mean = stats->rtt_sum / stats->oks;
 	variance = (stats->rtt_sum_square / stats->oks) - (mean * mean);
 	return sqrt(variance);
+}
+
+// Vr HL TOS  Len   ID Flg  off TTL Pro  cks      Src      Dst     Data
+//  4  5  00 0054 5d02   2 0000  01  01 4ee5 172.26.11.30  142.251.135.142
+// ICMP: type 8, code 0, size 64, id 0x082d, seq 0x0001
+
+static void print_ip_icmp_hdr(IcmpReply *message) {
+    printf("Vr HL TOS  Len   ID Flg  off TTL Pro  cks      Src      Dst     Data\n");
+    printf(" %1x  %1x  %02x %04x %04x   %1x %04x  %02x  %02x %04x %s  %s\n",
+           message->iphdr.version, message->iphdr.ihl, message->iphdr.tos, ntohs(message->iphdr.tot_len), ntohs(message->iphdr.id),
+           (ntohs(message->iphdr.frag_off) & 0xE000) >> 13, ntohs(message->iphdr.frag_off) & 0x1FFF,
+           message->iphdr.ttl, message->iphdr.protocol, ntohs(message->iphdr.check),
+           inet_ntoa(*(struct in_addr *)&message->iphdr.saddr),
+           inet_ntoa(*(struct in_addr *)&message->iphdr.daddr));
+    printf("ICMP: type 8, code 0, size 64, id 0x082d, seq 0x0001\n");
+	return ;
 }
