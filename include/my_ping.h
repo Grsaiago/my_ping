@@ -103,7 +103,7 @@ double		calculate_rtt_in_ms(const struct timeval *start, const struct timeval *e
 void	record_new_response(ProgramConf *conf, IcmpReply *message);
 /* printing */
 void	print_header(ProgramConf *conf);
-void	print_icmp_message(ProgramConf *conf, IcmpReply *message);
+void	print_icmp_message(ProgramConf *conf, IcmpReply *message, IcmpMessage *original_message);
 void	print_footer(ProgramConf *conf);
 /* main event loop */
 int		event_loop(ProgramConf *conf);
