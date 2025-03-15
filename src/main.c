@@ -33,9 +33,7 @@ int	event_loop(ProgramConf *conf) {
 	while(my_ping_should_continue == true) {
 		// if it didn't error_create a new message.
 		// If there was an error, we need to retry the same message.
-		if (!err_value) {
-			message = new_icmp_echo_message(conf);
-		}
+		message = new_icmp_echo_message(conf);
 		gettimeofday(&last_message.sent_at, NULL);
 		err_value = send_icmp_message(&conf->main_socket, &message);
 		if (err_value != 0) {
