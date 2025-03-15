@@ -134,6 +134,6 @@ static void print_ip_icmp_hdr(struct iphdr *iphdr, struct icmp *icmp) {
            icmp->icmp_type, icmp->icmp_code,
            ntohs(iphdr->tot_len) - (iphdr->ihl * 4),
 		   ntohs(icmp->icmp_hun.ih_idseq.icd_id),
-           ntohs(icmp->icmp_hun.ih_idseq.icd_seq));
+           icmp->icmp_hun.ih_idseq.icd_seq);
 	return ;
 }
