@@ -53,19 +53,22 @@ int	recv_icmp_message(Socket *sock, IcmpReply *message) {
 	char		readbuff[sizeof(struct iphdr) + sizeof(IcmpMessage)] = {0};
 	int		err_value;
 
-	err_value = recvfrom(sock->fd, readbuff, sizeof(readbuff),
-		      0, NULL, NULL);
-	if (err_value < (int)sock->addr_struct_size) {
-		if (err_value == -1) {
-			dprintf(STDERR_FILENO, "erro no recvfrom: %s\n", strerror(errno));
-			return (1);
-		} else {
-			dprintf(STDERR_FILENO, "erro no recvfrom: de %ld bytes, somente %d foram lidos", sizeof(struct icmp), err_value);
-			return (1);
+	// in the case a person runs two pings on the machine
+	while (message->icmp.icmp_hun.ih_idseq.icd_id != getpid()) {
+		err_value = recvfrom(sock->fd, readbuff, sizeof(readbuff),
+		       0, NULL, NULL);
+		if (err_value < (int)sock->addr_struct_size) {
+			if (err_value == -1) {
+				dprintf(STDERR_FILENO, "erro no recvfrom: %s\n", strerror(errno));
+				return (1);
+			} else {
+				dprintf(STDERR_FILENO, "erro no recvfrom: de %ld bytes, somente %d foram lidos", sizeof(struct icmp), err_value);
+				return (1);
+			}
 		}
+		message->iphdr = *(struct iphdr *)readbuff;
+		message->icmp = *(struct icmp *)(readbuff + (message->iphdr.ihl * 4));
 	}
-	message->iphdr = *(struct iphdr *)readbuff;
-	message->icmp = *(struct icmp *)(readbuff + (message->iphdr.ihl * 4));
 	return (0);
 }
 
